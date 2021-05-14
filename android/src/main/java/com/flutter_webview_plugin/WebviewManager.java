@@ -149,7 +149,7 @@ class WebviewManager {
                 String cookies = cookieManager.getCookie(url);
                 Map<String, Object> data = new HashMap<>();
                 data.put("url", url);
-                data.put("cookies", cookies));
+                data.put("cookies", cookies);
                 FlutterWebviewPlugin.channel.invokeMethod("onAndroidLoadResource", data);
                 // if (url.contains("https://h5api.m.taobao.com/h5/mtop.order.queryboughtlist") && url.contains("x5sec=")) {
                 //     String tempStr = url.substring(url.indexOf("x5sec="));
