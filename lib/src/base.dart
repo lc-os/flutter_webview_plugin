@@ -44,7 +44,7 @@ class FlutterWebviewPlugin {
   final _onProgressChanged = new StreamController<double>.broadcast();
   final _onHttpError = StreamController<WebViewHttpError>.broadcast();
   final _onPostMessage = StreamController<JavascriptMessage>.broadcast();
-  final _onAndroidLoadResource = StreamController<String>.broadcast();
+  final _onAndroidLoadResource = StreamController<WebViewLoadResource>.broadcast();
 
   final Map<String, JavascriptChannel> _javascriptChannels =
       <String, JavascriptChannel>{};
@@ -85,7 +85,7 @@ class FlutterWebviewPlugin {
             call.arguments['channel'], call.arguments['message']);
         break;
       case 'onAndroidLoadResource':
-        _onAndroidLoadResource.add(call.arguments['cookies']);
+        _onAndroidLoadResource.add(WebViewLoadResource(call.arguments['url'],call.arguments['cookies']));
         break;
     }
   }
@@ -115,7 +115,7 @@ class FlutterWebviewPlugin {
 
   Stream<WebViewHttpError> get onHttpError => _onHttpError.stream;
 
-  Stream<String> get onAndroidLoadResource => _onAndroidLoadResource.stream;
+  Stream<WebViewLoadResource> get onAndroidLoadResource => _onAndroidLoadResource.stream;
 
   /// Start the Webview with [url]
   /// - [headers] specify additional HTTP headers
@@ -415,4 +415,11 @@ class WebViewHttpError {
 
   final String url;
   final String code;
+}
+
+class WebViewLoadResource {
+  WebViewLoadResource(this.url, this.cookies);
+
+  final String url;
+  final String cookies;
 }

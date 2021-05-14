@@ -147,7 +147,10 @@ class WebviewManager {
                 super.onLoadResource(view, url);
                 CookieManager cookieManager = CookieManager.getInstance();
                 String cookies = cookieManager.getCookie(url);
-                FlutterWebviewPlugin.channel.invokeMethod("onAndroidLoadResource", cookies);
+                Map<String, Object> data = new HashMap<>();
+                data.put("url", url);
+                data.put("cookies", cookies));
+                FlutterWebviewPlugin.channel.invokeMethod("onAndroidLoadResource", data);
                 // if (url.contains("https://h5api.m.taobao.com/h5/mtop.order.queryboughtlist") && url.contains("x5sec=")) {
                 //     String tempStr = url.substring(url.indexOf("x5sec="));
                 //     String x5sec = tempStr.substring(0,tempStr.indexOf(";"));
