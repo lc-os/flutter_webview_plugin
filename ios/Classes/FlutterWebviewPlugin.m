@@ -1,5 +1,6 @@
 #import "FlutterWebviewPlugin.h"
 #import "WebviewJavaScriptChannelHandler.h"
+#import "FlutterCookieManager.h"
 
 static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
 
@@ -21,7 +22,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
 
     UIViewController *viewController = [UIApplication sharedApplication].delegate.window.rootViewController;
     FlutterWebviewPlugin* instance = [[FlutterWebviewPlugin alloc] initWithViewController:viewController];
-    
+    [FlutterCookieManager registerWithRegistrar:registrar];
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -216,7 +217,6 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
                 if (headers != nil) {
                     [request setAllHTTPHeaderFields:headers];
                 }
-
                 [self.webview loadRequest:request];
             }
         }
@@ -398,7 +398,6 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
         id data = @{@"url": navigationAction.request.URL.absoluteString};
         [channel invokeMethod:@"onUrlChanged" arguments:data];
     }
-
     if (_enableAppScheme ||
         ([webView.URL.scheme isEqualToString:@"http"] ||
          [webView.URL.scheme isEqualToString:@"https"] ||
@@ -420,7 +419,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     if (!navigationAction.targetFrame.isMainFrame) {
         [webView loadRequest:navigationAction.request];
     }
-
+    
     return nil;
 }
 

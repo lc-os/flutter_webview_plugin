@@ -28,6 +28,8 @@ class FlutterWebviewPlugin {
   FlutterWebviewPlugin.private(this._channel) {
     _channel.setMethodCallHandler(_handleMessages);
   }
+  static const MethodChannel _cookieManagerChannel =
+      MethodChannel('plugins.flutter.io/lcos_cookie_manager');
 
   static FlutterWebviewPlugin? _instance;
 
@@ -42,6 +44,7 @@ class FlutterWebviewPlugin {
   final _onProgressChanged = new StreamController<double>.broadcast();
   final _onHttpError = StreamController<WebViewHttpError>.broadcast();
   final _onPostMessage = StreamController<JavascriptMessage>.broadcast();
+  final _onAndroidLoadResource = StreamController<String>.broadcast();
 
   final Map<String, JavascriptChannel> _javascriptChannels =
       <String, JavascriptChannel>{};
@@ -81,6 +84,9 @@ class FlutterWebviewPlugin {
         _handleJavascriptChannelMessage(
             call.arguments['channel'], call.arguments['message']);
         break;
+      case 'onAndroidLoadResource':
+        _onAndroidLoadResource.add(call.arguments['cookies']);
+        break;
     }
   }
 
@@ -108,6 +114,8 @@ class FlutterWebviewPlugin {
   Stream<double> get onScrollXChanged => _onScrollXChanged.stream;
 
   Stream<WebViewHttpError> get onHttpError => _onHttpError.stream;
+
+  Stream<String> get onAndroidLoadResource => _onAndroidLoadResource.stream;
 
   /// Start the Webview with [url]
   /// - [headers] specify additional HTTP headers
@@ -272,6 +280,11 @@ class FlutterWebviewPlugin {
     return await _channel.invokeMethod('cleanCookies');
   }
 
+  /// Method channel implementation for [WebViewPlatform.clearCookies].
+  Future<bool?> clearHttpCookies() async {
+    return await _cookieManagerChannel.invokeMethod<bool>('clearCookies');
+  }
+
   // Stops current loading process
   Future<void> stopLoading() async =>
       await _channel.invokeMethod('stopLoading');
@@ -286,6 +299,7 @@ class FlutterWebviewPlugin {
     _onScrollYChanged.close();
     _onHttpError.close();
     _onPostMessage.close();
+    _onAndroidLoadResource.close();
     _instance = null;
   }
 
@@ -301,6 +315,32 @@ class FlutterWebviewPlugin {
     }
 
     return cookies;
+  }
+
+
+  /// Method channel implementation for [WebViewPlatform.setCookies].
+  Future<bool?> setHttpCookies(String url, String cookies) async {
+    return await _cookieManagerChannel.invokeMethod<bool>(
+      'setCookies',
+      <String, dynamic>{
+        'url': url,
+        'cookies': cookies.split(';').toList(growable: false),
+      },
+    );
+  }
+
+  /// Method channel implementation for [WebViewPlatform.getCookies].
+  Future<String?> getHttpCookies(String url) async {
+    return await _cookieManagerChannel.invokeMethod<String>(
+      'getCookies',
+      <String, String>{
+        'url': url,
+      },
+    );
+  }
+
+  Future<String?> getAndroidCookies() async {
+    return await _cookieManagerChannel.invokeMethod<String>('getAndroidCookies');
   }
 
   /// resize webview
