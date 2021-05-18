@@ -381,7 +381,8 @@ class FlutterWebviewPlugin {
 }
 
 class WebViewStateChanged {
-  WebViewStateChanged(this.type, this.url, this.navigationType);
+  // WebViewStateChanged(this.type, this.url, this.navigationType);
+  WebViewStateChanged(this.type, this.url);
 
   factory WebViewStateChanged.fromMap(Map<String, dynamic> map) {
     WebViewState t;
@@ -402,12 +403,15 @@ class WebViewStateChanged {
         throw UnimplementedError(
             'WebViewState type "${map['type']}" is not supported.');
     }
-    return WebViewStateChanged(t, map['url'], map['navigationType']);
+    return WebViewStateChanged(t, map['url']);
+    // return WebViewStateChanged(t, map['url'], map['navigationType']);
   }
 
   final WebViewState type;
   final String url;
-  final int navigationType;
+  //2021年05月18日16:54:08 fix bug
+  // final int navigationType;
+
 }
 
 class WebViewHttpError {
