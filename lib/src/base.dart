@@ -28,6 +28,7 @@ class FlutterWebviewPlugin {
   FlutterWebviewPlugin.private(this._channel) {
     _channel.setMethodCallHandler(_handleMessages);
   }
+
   static const MethodChannel _cookieManagerChannel =
       MethodChannel('plugins.flutter.io/lcos_cookie_manager');
 
@@ -44,7 +45,6 @@ class FlutterWebviewPlugin {
   final _onProgressChanged = new StreamController<double>.broadcast();
   final _onHttpError = StreamController<WebViewHttpError>.broadcast();
   final _onPostMessage = StreamController<JavascriptMessage>.broadcast();
-  final _onAndroidLoadResource = StreamController<WebViewLoadResource>.broadcast();
 
   final Map<String, JavascriptChannel> _javascriptChannels =
       <String, JavascriptChannel>{};
@@ -84,9 +84,6 @@ class FlutterWebviewPlugin {
         _handleJavascriptChannelMessage(
             call.arguments['channel'], call.arguments['message']);
         break;
-      case 'onAndroidLoadResource':
-        _onAndroidLoadResource.add(WebViewLoadResource(call.arguments['url'],call.arguments['cookies']));
-        break;
     }
   }
 
@@ -114,8 +111,6 @@ class FlutterWebviewPlugin {
   Stream<double> get onScrollXChanged => _onScrollXChanged.stream;
 
   Stream<WebViewHttpError> get onHttpError => _onHttpError.stream;
-
-  Stream<WebViewLoadResource> get onAndroidLoadResource => _onAndroidLoadResource.stream;
 
   /// Start the Webview with [url]
   /// - [headers] specify additional HTTP headers
@@ -299,7 +294,6 @@ class FlutterWebviewPlugin {
     _onScrollYChanged.close();
     _onHttpError.close();
     _onPostMessage.close();
-    _onAndroidLoadResource.close();
     _instance = null;
   }
 
@@ -316,7 +310,6 @@ class FlutterWebviewPlugin {
 
     return cookies;
   }
-
 
   /// Method channel implementation for [WebViewPlatform.setCookies].
   Future<bool?> setHttpCookies(String url, String cookies) async {
@@ -337,10 +330,6 @@ class FlutterWebviewPlugin {
         'url': url,
       },
     );
-  }
-
-  Future<String?> getAndroidCookies() async {
-    return await _cookieManagerChannel.invokeMethod<String>('getAndroidCookies');
   }
 
   /// resize webview
@@ -381,8 +370,7 @@ class FlutterWebviewPlugin {
 }
 
 class WebViewStateChanged {
-  // WebViewStateChanged(this.type, this.url, this.navigationType);
-  WebViewStateChanged(this.type, this.url);
+  WebViewStateChanged(this.type, this.url, this.navigationType);
 
   factory WebViewStateChanged.fromMap(Map<String, dynamic> map) {
     WebViewState t;
@@ -403,15 +391,13 @@ class WebViewStateChanged {
         throw UnimplementedError(
             'WebViewState type "${map['type']}" is not supported.');
     }
-    return WebViewStateChanged(t, map['url']);
-    // return WebViewStateChanged(t, map['url'], map['navigationType']);
+    return WebViewStateChanged(t, map['url'],
+        map.containsKey('navigationType') ? map['navigationType'] : null);
   }
 
   final WebViewState type;
   final String url;
-  //2021年05月18日16:54:08 fix bug
-  // final int navigationType;
-
+  final int navigationType;
 }
 
 class WebViewHttpError {
@@ -419,11 +405,4 @@ class WebViewHttpError {
 
   final String url;
   final String code;
-}
-
-class WebViewLoadResource {
-  WebViewLoadResource(this.url, this.cookies);
-
-  final String url;
-  final String cookies;
 }

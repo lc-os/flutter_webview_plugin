@@ -142,33 +142,6 @@ class WebviewManager {
                     super.onReceivedSslError(view, handler, error);
                 }
             }
-            @Override
-            public void onLoadResource(WebView view, String url){
-                super.onLoadResource(view, url);
-                CookieManager cookieManager = CookieManager.getInstance();
-                String cookies = cookieManager.getCookie(url);
-                Map<String, Object> data = new HashMap<>();
-                data.put("url", url);
-                data.put("cookies", cookies);
-                FlutterWebviewPlugin.channel.invokeMethod("onAndroidLoadResource", data);
-                // if (url.contains("https://h5api.m.taobao.com/h5/mtop.order.queryboughtlist") && url.contains("x5sec=")) {
-                //     String tempStr = url.substring(url.indexOf("x5sec="));
-                //     String x5sec = tempStr.substring(0,tempStr.indexOf(";"));
-                //     cookieStr += x5sec;
-                //     data.put("cookies", cookieStr);
-                //     FlutterWebviewPlugin.channel.invokeMethod("onAndroidCookiesChanged", data);
-                //     System.out.println(">>>>>>>>>>>>======urlx5secCookie=======<<<<<<<<<<<<<<<"+cookieStr);
-                // }  else {
-                //     if (cookieStr != null && cookieStr.contains("x5sec=")) {
-                //         System.out.println(">>>>>>>>>>>>======x5secCookie=======<<<<<<<<<<<<<<<"+cookieStr);
-                //         data.put("cookies", cookieStr);
-                //         FlutterWebviewPlugin.channel.invokeMethod("onAndroidCookiesChanged", data);
-                //     }else {
-                //         System.out.println(">>>>>>>>>>>>======no cookies=======<<<<<<<<<<<<<<<"+cookieStr);
-                //     }
-                // }
-                
-            }
         };
         webView.setOnKeyListener(new View.OnKeyListener() {
             @Override
